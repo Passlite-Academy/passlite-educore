@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Teachers - Passlite Insights</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f5f9; margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        .sidebar { width: 260px; background: #123c69; color: white; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .sidebar-brand { padding: 20px; font-size: 18px; font-weight: bold; background: #0b2948; text-align: center; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .sidebar-menu li a { display: block; padding: 14px 20px; color: #cbd5e1; text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: #1e4976; color: white; padding-left: 25px; }
+        .sidebar-footer { padding: 15px 20px; background: #0b2948; font-size: 12px; text-align: center; color: #94a3b8; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .topbar h2 { margin: 0; color: #123c69; font-size: 18px; }
+        .container { max-width: 950px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #334155; }
+        input[type="text"], input[type="password"], input[type="email"], input[type="tel"] { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+        .subjects-box { max-height: 280px; overflow-y: auto; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; background: #fafbfc; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 13px; }
+        .subjects-box label { font-weight: normal; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .section-subheading { color: #123c69; font-size: 13px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; grid-column: span 2; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
+        .btn-submit { background: #123c69; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; }
+        .btn-submit:hover { background: #0b2948; }
+        .btn-delete { background: #dc2626; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-delete:hover { background: #b91c1c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 13px; text-align: left; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; color: #475569; }
+        .alert { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+        .success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">Passlite Insights</div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
+                <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
+                <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
+                <li><a href="{{ url_for('school_record') }}">🏫 School Record</a></li>
+                <li><a href="{{ url_for('manage_teachers') }}" class="active">👥 Users</a></li>
+                <li><a href="{{ url_for('school_settings') }}">⚙️ Settings</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <span>{{ session.get('username') }}</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h2>Teacher Account & Subject Assignment Management</h2>
+            <div>📅 {{ user.academic_session }} | {{ user.current_term }}</div>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto;">
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="{{ 'success' if category == 'success' else 'alert' }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <h3 style="color: #123c69; margin-top: 0;">Register New Teacher</h3>
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Teacher's Full Name:</label>
+                        <input type="text" name="name" placeholder="e.g. Mr. Okoro Samuel" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Username (For Teacher Login):</label>
+                        <input type="text" name="username" placeholder="e.g. samuel_math" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" name="password" placeholder="Create secure password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assign Subjects (Check all that this teacher handles):</label>
+                        <div class="subjects-box">
+                            <div class="section-subheading">Junior Secondary Subjects</div>
+                            <label><input type="checkbox" name="subjects" value="English language"> English language (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Mathematics"> Mathematics (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Physical and health education (PHE)"> Physical & Health Ed (PHE)</label>
+                            <label><input type="checkbox" name="subjects" value="Social studies"> Social Studies</label>
+                            <label><input type="checkbox" name="subjects" value="Business studies"> Business Studies</label>
+                            <label><input type="checkbox" name="subjects" value="Basic Technology"> Basic Technology</label>
+                            <label><input type="checkbox" name="subjects" value="Basic Science"> Basic Science</label>
+                            <label><input type="checkbox" name="subjects" value="Lit in English"> Lit in English (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Cultural and creative art (CCA)"> Cultural & Creative Art (CCA)</label>
+                            <label><input type="checkbox" name="subjects" value="Yoruba/Hausa/Igbo"> Yoruba/Hausa/Igbo</label>
+                            <label><input type="checkbox" name="subjects" value="Agric science"> Agric Science (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Home Economics"> Home Economics</label>
+                            <label><input type="checkbox" name="subjects" value="Computer studies/ICT"> Computer Studies/ICT (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Data processing"> Data Processing (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Civic Education"> Civic Education (JSS)</label>
+                            <label><input type="checkbox" name="subjects" value="CRS / IRK"> CRS / IRK</label>
+                            <label><input type="checkbox" name="subjects" value="French"> French</label>
+                            <label><input type="checkbox" name="subjects" value="Trade subject"> Trade Subject</label>
+                            <label><input type="checkbox" name="subjects" value="Fine art"> Fine Art</label>
+                            <label><input type="checkbox" name="subjects" value="Food & Nutrition"> Food & Nutrition (JSS)</label>
+
+                            <div class="section-subheading" style="margin-top: 15px;">Senior Secondary Subjects</div>
+                            <label><input type="checkbox" name="subjects" value="English Language"> English Language (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Mathematics"> Mathematics (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Lit-in-English"> Lit-in-English (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Physics"> Physics</label>
+                            <label><input type="checkbox" name="subjects" value="Chemistry"> Chemistry</label>
+                            <label><input type="checkbox" name="subjects" value="Biology"> Biology</label>
+                            <label><input type="checkbox" name="subjects" value="Agric Science"> Agric Science (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Geography"> Geography</label>
+                            <label><input type="checkbox" name="subjects" value="Account"> Account</label>
+                            <label><input type="checkbox" name="subjects" value="Commerce"> Commerce</label>
+                            <label><input type="checkbox" name="subjects" value="Further Maths"> Further Maths</label>
+                            <label><input type="checkbox" name="subjects" value="Economics"> Economics</label>
+                            <label><input type="checkbox" name="subjects" value="Marketing"> Marketing</label>
+                            <label><input type="checkbox" name="subjects" value="Government"> Government</label>
+                            <label><input type="checkbox" name="subjects" value="ICT"> ICT (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Data Processing"> Data Processing (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Civic Education"> Civic Education (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Yoruba"> Yoruba (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="C.R.S."> C.R.S. (SSS)</label>
+                            <label><input type="checkbox" name="subjects" value="Music"> Music</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number (Optional):</label>
+                        <input type="tel" name="phone" placeholder="e.g. 08012345678">
+                    </div>
+
+                    <button type="submit" class="btn-submit">➕ Create Teacher Account & Assign Subjects</button>
+                </form>
+
+                <h3 style="color: #123c69; margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 15px;">Registered Teachers Directory</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Assigned Subjects</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if teachers %}
+                            {% for t in teachers %}
+                            <tr>
+                                <td><strong>{{ t.name }}</strong></td>
+                                <td>{{ t.username }}</td>
+                                <td><span style="background: #eff6ff; color: #1e40af; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">{{ t.subjects or 'No subjects assigned' }}</span></td>
+                                <td>{{ t.phone or 'N/A' }}</td>
+                                <td>
+                                    <form action="{{ url_for('delete_teacher', teacher_id=t.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this teacher?');" style="margin: 0;">
+                                        <button type="submit" class="btn-delete">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 15px;">No teachers registered yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

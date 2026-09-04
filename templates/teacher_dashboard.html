@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard - Score Input</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="#">{{ school.school_name or 'School Portal' }} (Staff Portal)</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text text-light me-3">Welcome, <strong>{{ teacher.name }}</strong></span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('teacher_logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4>Score Entry Dashboard</h4>
+                <p class="text-muted mb-0">Select any student below to input or update their test and examination scores for the current term.</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Enrolled Students</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Gender</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.roll_number or 'N/A' }}</td>
+                                <td><strong>{{ student.name }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ student.class }}</span></td>
+                                <td>{{ student.sex or 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('marks_entry', student_id=student.id) }}" class="btn btn-primary btn-sm">Input Scores</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No students have been registered by school management yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

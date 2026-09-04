@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Checker - Passlite Insights Academy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1e293b;
+        }
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 440px;
+            box-sizing: border-box;
+            border-top: 4px solid #123c69;
+            margin: 20px;
+        }
+        h2 {
+            color: #123c69;
+            margin-top: 0;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+        p.subtitle {
+            color: #64748b;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #ccd1d9;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fafbfc;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[type="text"]:focus, select:focus {
+            border-color: #123c69;
+            outline: none;
+            background: white;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            margin-top: 10px;
+            background-color: #123c69;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #0b2948;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .alert-danger {
+            background-color: #fadbd8;
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>PASSLITE INSIGHTS</h2>
+        <p class="subtitle">Select your session, term, and enter your details to view your result securely.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="academic_session">Academic Session</label>
+                <select id="academic_session" name="academic_session" required>
+                    {% for sess in academic_sessions %}
+                        <option value="{{ sess }}" {% if loop.first %}selected{% endif %}>{{ sess }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="current_term">Term</label>
+                <select id="current_term" name="current_term" required>
+                    <option value="First Term">First Term</option>
+                    <option value="Second Term">Second Term</option>
+                    <option value="Third Term">Third Term</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="roll_number">Roll / Admission Number</label>
+                <input type="text" id="roll_number" name="roll_number" placeholder="e.g. JSS101" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="name_input">Student Name (First name or Surname)</label>
+                <input type="text" id="name_input" name="name_input" placeholder="e.g. Abibat or Saheed" required>
+            </div>
+            
+            <button type="submit" class="btn-primary">🔍 View Result</button>
+        </form>
+    </div>
+</body>
+</html>

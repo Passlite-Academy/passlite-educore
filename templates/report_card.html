@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Academic Report Card - {{ student['name'] }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: #111;
+            font-size: 10px;
+        }
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background: #123c69;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .sidebar-brand {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #0b2948;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .sidebar-menu li a {
+            display: block;
+            padding: 14px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            background: #1e4976;
+            color: white;
+            padding-left: 25px;
+        }
+        .sidebar-footer {
+            padding: 15px 20px;
+            background: #0b2948;
+            font-size: 12px;
+            text-align: center;
+            color: #94a3b8;
+        }
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .topbar h2 {
+            margin: 0;
+            color: #123c69;
+            font-size: 18px;
+        }
+        .session-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #1e3a8a;
+            font-weight: bold;
+        }
+        
+        /* Report Card Paper Container */
+        .report-wrapper {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        .report-card {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            padding: 15px;
+            border: 2px solid #123c69;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 6px;
+        }
+
+        /* Header Styling */
+        .header {
+            width: 100%;
+            border-bottom: 2px solid #123c69;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .school-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .student-photo {
+            width: 55px;
+            height: 65px;
+            object-fit: cover;
+            border: 1px solid #123c69;
+            border-radius: 4px;
+            padding: 2px;
+            background: #fff;
+        }
+        .signature-img {
+            max-height: 35px;
+            max-width: 100px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        /* Enhanced Bold & Stretched School Heading */
+        .header-center h1 {
+            color: #0b2948;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            line-height: 1.1;
+        }
+        .term-badge-container {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .term-badge {
+            display: inline-block;
+            background: #123c69;
+            color: white;
+            padding: 3px 15px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Bio-Data Table */
+        .bio-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            font-size: 9.5px;
+            border: 1px solid #123c69;
+        }
+        .bio-table td {
+            padding: 4px 6px;
+            border: 1px solid #94a3b8;
+        }
+        .bio-table td span {
+            color: #475569;
+        }
+        .bio-table td strong {
+            color: #0f172a;
+        }
+
+        /* Marks & General Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        th, td {
+            padding: 3px 4px;
+            text-align: center;
+            border: 1px solid #94a3b8;
+            font-size: 9.5px;
+        }
+        th {
+            background: #123c69;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        td.subject-name {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        /* Summary Bar */
+        .summary-bar {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            background: #f8fafc;
+        }
+        .summary-bar td {
+            padding: 4px;
+            font-size: 9.5px;
+            border: 1px solid #123c69;
+            font-weight: bold;
+        }
+
+        /* Sub-tables */
+        .sub-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5px;
+            margin-bottom: 0;
+        }
+        .sub-table th, .sub-table td {
+            padding: 2px 3px;
+            border: 1px solid #94a3b8;
+        }
+        .sub-table th {
+            background: #334155;
+            font-size: 8.5px;
+        }
+        .trait-name {
+            text-align: left;
+        }
+
+        /* Next Term Bills & Comments */
+        .section-title {
+            background: #123c69;
+            color: white;
+            text-align: center;
+            font-size: 9.5px;
+            font-weight: bold;
+            padding: 3px;
+            text-transform: uppercase;
+            border: 1px solid #123c69;
+        }
+        .comments-box {
+            border: 1px solid #94a3b8;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            font-size: 9.5px;
+            background: #fafafa;
+        }
+        .comment-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+            margin-bottom: 4px;
+        }
+        .comment-table td {
+            border: none;
+            padding: 3px 0;
+            text-align: left;
+            font-size: 9.5px;
+        }
+
+        /* Footer Actions */
+        .footer-actions {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .btn {
+            background: #123c69;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            display: inline-block;
+            margin-right: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-print { background: #16a34a; }
+        .btn-pdf { background: #d97706; }
+
+        @media print {
+            body { background: white; display: block; height: auto; overflow: visible; }
+            .sidebar, .topbar, .footer-actions { display: none !important; }
+            .report-wrapper { padding: 0; display: block; }
+            .report-card { border: none; box-shadow: none; max-width: 100%; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left-Hand Sidebar (Hidden Automatically for Public Student/Parent Views) -->
+    {% if not is_public %}
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                Passlite Insights
+            </div>
+            <ul class="sidebar-menu">
+                {% if session.get('user_id') or session.get('teacher_id') %}
+                    <!-- Full Admin/Teacher Navigation -->
+                    <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                    <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                    <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
+                    <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
+                    <li><a href="{{ url_for('report_card_overview') }}" class="active">📄 Report Card</a></li>
+                    <li><a href="{{ url_for('school_record') }}">🏫 School Record</a></li>
+                    <li><a href="{{ url_for('manage_teachers') }}">👥 Users</a></li>
+                    <li><a href="{{ url_for('school_settings') }}">⚙️ Settings</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('check_result') }}">🏠 Check Another Result</a></li>
+                    <li><a href="#" class="active">📄 Student Report Card</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            {% if session.get('user_id') or session.get('teacher_id') %}
+                <span>{{ session.get('username') }} | <a href="{{ url_for('logout') }}" style="color: #cbd5e1; text-decoration: underline;">Logout</a></span>
+            {% else %}
+                <span>Passlite Portal</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        {% if not is_public %}
+        <div class="topbar">
+            <h2>Student Report Card Preview</h2>
+            <div class="session-badge">
+                📅 {{ user.academic_session }} — {{ user.current_term }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="report-wrapper">
+            <div class="report-card">
+                <!-- School Header with Enhanced Bold, Stretched Heading & Tight Spacing -->
+                <table class="header">
+                    <tr>
+                        <td style="width: 15%; text-align: left; border: none; vertical-align: middle;">
+                            {% if user.logo %}
+                                <img src="{{ url_for('static', filename=user.logo.replace('static/', '')) }}" alt="School Logo" class="school-logo">
+                            {% endif %}
+                        </td>
+                        <td class="header-center" style="width: 70%; text-align: center; border: none;">
+                            <h1>{{ user.school_name if user.school_name else "PASSLITE INSIGHTS ACADEMY" }}</h1>
+                            <p style="font-size: 10.5px; color: #222; margin: 2px 0 1px 0;">{{ user.address if user.address else 'Lagos, Nigeria' }}</p>
+                            {% if user.motto %}
+                            <p style="font-size: 10px; color: #123c69; margin: 1px 0;"><strong>MOTTO:</strong> {{ user.motto }}</p>
+                            {% endif %}
+                            <p style="font-size: 9.5px; color: #444; margin: 1px 0 0 0;">
+                                {% if user.phone %}<strong>PHONE:</strong> {{ user.phone }}{% endif %}
+                                {% if user.email %} | <strong>EMAIL:</strong> {{ user.email }}{% endif %}
+                            </p>
+                        </td>
+                        <td style="width: 15%; text-align: right; border: none; vertical-align: middle;">
+                            {% if student['photo'] %}
+                                <img src="{{ url_for('static', filename=student['photo'].replace('static/', '')) }}" alt="Student Photo" class="student-photo">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="term-badge-container">
+                    <div class="term-badge">TERMINAL REPORT SHEET</div>
+                </div>
+
+                <!-- Student Bio-Data Table -->
+                <table class="bio-table">
+                    <tr>
+                        <td style="width: 23%;"><span>ACADEMIC SESSION:</span></td>
+                        <td style="width: 25%;"><strong>{{ user.academic_session if user.academic_session else '2026/2027' }}</strong></td>
+                        <td style="width: 10%;"><span>TERM:</span></td>
+                        <td style="width: 17%;"><strong>{{ user.current_term if user.current_term else 'First Term' }}</strong></td>
+                        <td style="width: 12%;"><span>DEPARTMENT:</span></td>
+                        <td style="width: 13%;"><strong>{{ student['department'] if student['department'] else 'Junior General' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><span>STUDENT NAME:</span></td>
+                        <td colspan="3"><strong>{{ student['name'] }}</strong></td>
+                        <td><span>STUDENT NO:</span></td>
+                        <td><strong>{{ student['roll_number'] or 'SS1001' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><span>DOS:</span></td>
+                        <td><strong>102</strong></td>
+                        <td><span>ATTENDANCE:</span></td>
+                        <td style="white-space: nowrap;"><strong>Present: {{ student['attendance_present'] or 0 }} | Absent: {{ student['attendance_absent'] or 0 }}</strong></td>
+                        <td><span>DOB:</span></td>
+                        <td><strong>{{ student['dob'] or '-' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><span>CLASS:</span></td>
+                        <td><strong>{{ student['class'] }}</strong></td>
+                        <td colspan="2"><span>SEX:</span></td>
+                        <td colspan="2"><strong>{{ student['sex'] or '-' }}</strong></td>
+                    </tr>
+                </table>
+
+                <!-- Marks Table (Whole Number Formatted) -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 5%;">S/N</th>
+                            <th rowspan="2" style="text-align: left; width: 28%;">SUBJECT</th>
+                            <th style="width: 9%;">TEST</th>
+                            <th style="width: 9%;">EXAM</th>
+                            <th style="width: 9%;">TOTAL</th>
+                            <th style="width: 9%;">LAST TERM</th>
+                            <th style="width: 9%;">CUMM</th>
+                            <th rowspan="2" style="width: 8%;">Grade</th>
+                            <th rowspan="2" style="width: 8%;">Position</th>
+                            <th rowspan="2" style="width: 15%;">REMARKS</th>
+                        </tr>
+                        <tr>
+                            <th>40</th>
+                            <th>60</th>
+                            <th>100</th>
+                            <th>100</th>
+                            <th>100</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if marks %}
+                            {% for mark in marks %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td class="subject-name">{{ mark['subject'] }}</td>
+                                <td>{{ mark['test_score'] | round | int if mark['test_score'] is not none else '-' }}</td>
+                                <td>{{ mark['exam_score'] | round | int if mark['exam_score'] is not none else '-' }}</td>
+                                <td><strong>{{ mark['total'] | round | int if mark['total'] is not none else '-' }}</strong></td>
+                                <td>{{ mark['last_cumm'] | round | int if mark['last_cumm'] and mark['last_cumm'] > 0 else '-' }}</td>
+                                <td><strong>{{ mark['cumm'] | round | int if mark['cumm'] is not none else '-' }}</strong></td>
+                                <td><strong>{{ mark['grade'] or '-' }}</strong></td>
+                                <td>{{ loop.index + 10 }}</td>
+                                <td>{{ mark['remark'] or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" style="padding: 10px; color: #777; font-style: italic;">No marks recorded for this student yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <!-- Summary Statistics Bar -->
+                <table class="summary-bar">
+                    <tr>
+                        <td style="width: 18%;">Total Marks:</td>
+                        <td style="width: 10%; text-align: center;">{{ (marks | length) * 100 }}</td>
+                        <td style="width: 18%;">Obtained Marks:</td>
+                        <td style="width: 10%; text-align: center;">{{ total_obtained | round | int if total_obtained else 0 }}</td>
+                        <td style="width: 15%;">Percentage:</td>
+                        <td style="width: 12%; text-align: center;">{{ percentage | round(2) if percentage else 0 }}%</td>
+                        <td style="width: 10%;">Grade:</td>
+                        <td style="width: 7%; text-align: center;">{{ student_grade | default('F') }}</td>
+                    </tr>
+                </table>
+
+                <!-- Psychomotor Skills, Effective Areas & Grading Scale Section -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
+                    <tr>
+                        <td style="width: 35%; vertical-align: top; padding-right: 3px; border: none;">
+                            <table class="sub-table">
+                                <tr><th colspan="4" style="background: #123c69;">PSYCHOMOTOR SKILLS</th></tr>
+                                <tr><th class="trait-name">SKILL</th><th style="width: 18px;">1</th><th style="width: 18px;">2</th><th style="width: 18px;">3</th></tr>
+                                {% set psychomotors = ['Creative', 'Verbal Fluency', 'Games', 'Sports', 'Handling tools', 'Drawing & Painting', 'Music Skills'] %}
+                                {% for p in psychomotors %}
+                                {% set rating = behavior_ratings | selectattr('trait', 'equalto', p) | map(attribute='rating') | first | default(1) %}
+                                <tr>
+                                    <td class="trait-name">{{ p }}</td>
+                                    <td style="text-align: center;">{% if rating == 1 %}✔{% endif %}</td>
+                                    <td style="text-align: center;">{% if rating == 2 %}✔{% endif %}</td>
+                                    <td style="text-align: center;">{% if rating == 3 %}✔{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            <div style="margin-top: 3px; border: 1px solid #94a3b8; background: #f8fafc; padding: 3px; font-size: 8.5px;">
+                                <strong>AWARD PRIZE WON:</strong> <span style="color: #123c69; font-weight: bold;">{{ student['award_won'] or '-' }}</span>
+                            </div>
+                        </td>
+
+                        <td style="width: 39%; vertical-align: top; padding-left: 3px; padding-right: 3px; border: none;">
+                            <table class="sub-table">
+                                <tr><th colspan="4" style="background: #123c69;">EFFECTIVE AREAS</th></tr>
+                                <tr><th class="trait-name">TRAIT</th><th style="width: 18px;">1</th><th style="width: 18px;">2</th><th style="width: 18px;">3</th></tr>
+                                {% set effectives = ['Punctuality', 'Neatness', 'Politeness', 'Honesty', 'Relationship with others', 'Leadership', 'Emotional Stability', 'Attitude to school', 'Attentiveness', 'Perseverance'] %}
+                                {% for e in effectives %}
+                                {% set rating = behavior_ratings | selectattr('trait', 'equalto', e) | map(attribute='rating') | first | default(1) %}
+                                <tr>
+                                    <td class="trait-name">{{ e }}</td>
+                                    <td style="text-align: center;">{% if rating == 1 %}✔{% endif %}</td>
+                                    <td style="text-align: center;">{% if rating == 2 %}✔{% endif %}</td>
+                                    <td style="text-align: center;">{% if rating == 3 %}✔{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+
+                        <td style="width: 26%; vertical-align: top; padding-left: 3px; border: none;">
+                            <table class="sub-table">
+                                <tr><th colspan="3" style="background: #123c69;">GRADING SCALE</th></tr>
+                                <tr><th>SCORE</th><th>GRADE</th><th>REMARKS</th></tr>
+                                <tr><td>75 - 100</td><td>A1</td><td>Excellent</td></tr>
+                                <tr><td>70 - 74</td><td>B2</td><td>Very Good</td></tr>
+                                <tr><td>65 - 69</td><td>B3</td><td>Good</td></tr>
+                                <tr><td>60 - 64</td><td>C4</td><td>Credit</td></tr>
+                                <tr><td>55 - 59</td><td>C5</td><td>Credit</td></tr>
+                                <tr><td>50 - 54</td><td>C6</td><td>Average</td></tr>
+                                <tr><td>45 - 49</td><td>D7</td><td>Fair</td></tr>
+                                <tr><td>40 - 44</td><td>E8</td><td>Pass</td></tr>
+                                <tr><td>0 - 39</td><td>F9</td><td>Fail</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="background: #f1f5f9; border: 1px solid #94a3b8; padding: 3px; font-size: 8.5px; margin-bottom: 6px; text-align: center;">
+                    <strong>SCALE:</strong> 1. Very Good &nbsp;&nbsp;|&nbsp;&nbsp; 2. Good &nbsp;&nbsp;|&nbsp;&nbsp; 3. Below Average
+                </div>
+
+                <div class="section-title">Next Term Bills</div>
+                <table class="sub-table" style="margin-bottom: 6px; text-align: center;">
+                    <tr>
+                        <th>DEBT</th>
+                        <th>SCHOOL FEES</th>
+                        <th>COMPUTER</th>
+                        <th>LESSONS</th>
+                        <th>UTILITY</th>
+                        <th>TOTAL</th>
+                    </tr>
+                    <tr>
+                        <td>{{ student['bill_debt'] | round | int if student['bill_debt'] else '-' }}</td>
+                        <td>{{ student['bill_school_fees'] | round | int if student['bill_school_fees'] else '-' }}</td>
+                        <td>{{ student['bill_computer'] | round | int if student['bill_computer'] else '-' }}</td>
+                        <td>{{ student['bill_lessons'] | round | int if student['bill_lessons'] else '-' }}</td>
+                        <td>{{ student['bill_utility'] | round | int if student['bill_utility'] else '-' }}</td>
+                        <td><strong>{{ ((student['bill_debt'] or 0) + (student['bill_school_fees'] or 0) + (student['bill_computer'] or 0) + (student['bill_lessons'] or 0) + (student['bill_utility'] or 0)) | round | int }}</strong></td>
+                    </tr>
+                </table>
+
+                <!-- Comments & Signatures Section -->
+                <div class="comments-box">
+                    <table class="comment-table" style="margin-bottom: 6px;">
+                        <tr>
+                            <td><strong>Vacation Date:</strong> {{ user.vacation_date or 'Not Set' }}</td>
+                            <td style="text-align: right;"><strong>Next term Resumption Date:</strong> {{ user.resumption_date or 'Not Set' }}</td>
+                        </tr>
+                    </table>
+
+                    <table class="comment-table">
+                        <tr>
+                            <td style="width: 70%;">
+                                <strong>Class Teacher's Comment:</strong> 
+                                <span style="border-bottom: 1px dashed #64748b; padding-bottom: 1px;">{{ student['class_teacher_comment'] if student['class_teacher_comment'] else 'Has performed well and should strive for higher achievement.' }}</span>
+                            </td>
+                            <td style="width: 30%; text-align: right;">
+                                <strong>Sign:</strong> 
+                                {% if user.teacher_signature %}
+                                    <img src="{{ url_for('static', filename=user.teacher_signature.replace('static/', '')) }}" alt="Teacher Signature" class="signature-img">
+                                {% else %}
+                                    ____________
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Head Teacher's Comment:</strong> 
+                                <span style="border-bottom: 1px dashed #64748b; padding-bottom: 1px;">{{ student['head_teacher_comment'] if student['head_teacher_comment'] else 'Made satisfactory progress. Greater commitment will lead to higher achievement.' }}</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <strong>Sign & Stamp:</strong> 
+                                {% if user.head_teacher_signature %}
+                                    <img src="{{ url_for('static', filename=user.head_teacher_signature.replace('static/', '')) }}" alt="Head Teacher Signature" class="signature-img">
+                                {% else %}
+                                    ____________
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="footer-actions">
+                    <button onclick="window.print()" class="btn btn-print">🖨️ Print Report</button>
+                    <a href="{{ url_for('report_card_pdf', student_id=student['id']) }}" class="btn btn-pdf">📥 Download PDF</a>
+                    {% if session.get('user_id') or session.get('teacher_id') %}
+                        <a href="{{ url_for('report_card_overview') }}" class="btn">← Back to Overview</a>
+                    {% else %}
+                        <a href="{{ url_for('check_result') }}" class="btn">← Check Another Result</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

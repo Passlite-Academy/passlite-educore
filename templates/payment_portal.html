@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Term Activation - Passlite Portal</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #123c69;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 30px auto;
+            padding: 20px;
+            flex: 1;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 5px solid #dc2626;
+        }
+
+        h2 {
+            color: #123c69;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            text-align: center;
+            font-weight: bold;
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .row span {
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd1d9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafbfc;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: #123c69;
+            background: white;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin: 25px 0 15px 0;
+            color: #16a34a;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #16a34a;
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #15803d;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #123c69;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>PASSLITE INSIGHTS ACADEMY</h1>
+    <p>Digital Report Card & Continuous Assessment System</p>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Term Activation Required</h2>
+        
+        <div class="status">
+            License Inactive for This Term
+        </div>
+
+        <div class="row">
+            <strong>School Name</strong>
+            <span>{{ user.school_name if user.school_name else user.username }}</span>
+        </div>
+
+        <div class="row">
+            <strong>Academic Session</strong>
+            <span>{{ user.academic_session or '2026/2027' }}</span>
+        </div>
+
+        <div class="row">
+            <strong>Target Term</strong>
+            <span>{{ user.current_term or 'First Term' }}</span>
+        </div>
+
+        <div class="row">
+            <strong>Access Coverage</strong>
+            <span>Continuous Assessments, Scores & PDF Reports</span>
+        </div>
+
+        <form action="{{ url_for('pay') }}" method="POST">
+            <div class="form-group">
+                <label for="coverage_type">Select Coverage Category</label>
+                <select name="coverage_type" id="coverage_type" onchange="updatePrice()">
+                    <option value="Junior">Junior School Only (₦25,000)</option>
+                    <option value="Senior">Senior School Only (₦30,000)</option>
+                    <option value="Both">Both Junior & Senior Combo (₦50,000)</option>
+                </select>
+            </div>
+
+            <div class="amount" id="priceText">
+                ₦25,000
+            </div>
+
+            <button type="submit" class="button">
+                Proceed with Paystack Payment
+            </button>
+        </form>
+
+        <a href="{{ url_for('select_term') }}" class="back">
+            ← Switch Term / Session
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    function updatePrice() {
+        const selectBox = document.getElementById('coverage_type');
+        const priceDisplay = document.getElementById('priceText');
+        const selectedValue = selectBox.value;
+
+        if (selectedValue === 'Senior') {
+            priceDisplay.innerText = '₦30,000';
+        } else if (selectedValue === 'Both') {
+            priceDisplay.innerText = '₦50,000';
+        } else {
+            priceDisplay.innerText = '₦25,000';
+        }
+    }
+</script>
+
+</body>
+</html>

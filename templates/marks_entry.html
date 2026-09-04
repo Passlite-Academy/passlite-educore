@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks & Data Entry - {{ student['name'] }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background: #123c69;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .sidebar-brand {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #0b2948;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .sidebar-menu li a {
+            display: block;
+            padding: 14px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            background: #1e4976;
+            color: white;
+            padding-left: 25px;
+        }
+        .sidebar-footer {
+            padding: 15px 20px;
+            background: #0b2948;
+            font-size: 12px;
+            text-align: center;
+            color: #94a3b8;
+        }
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .topbar h2 {
+            margin: 0;
+            color: #123c69;
+            font-size: 18px;
+        }
+        .session-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #1e3a8a;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h3 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 25px;
+            font-size: 16px;
+        }
+        .section-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #334155;
+        }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+        textarea {
+            resize: vertical;
+            height: 60px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+        td.subject-title {
+            text-align: left;
+            font-weight: 500;
+        }
+        .btn-submit {
+            background: #16a34a;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-submit:hover {
+            background: #15803d;
+        }
+        .btn-logout {
+            background: #dc2626;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        .btn-logout:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                Passlite Insights
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                
+                {% if not session.get('teacher_id') %}
+                    <!-- Admin Navigation Links -->
+                    <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                    <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
+                    <li><a href="{{ url_for('score_sheet') }}" class="active">📝 Score Sheet</a></li>
+                    <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
+                    <li><a href="{{ url_for('school_settings') }}">🏫 School Record</a></li>
+                    <li><a href="{{ url_for('manage_teachers') }}">👥 Users</a></li>
+                    <li><a href="{{ url_for('school_settings') }}">⚙️ Settings</a></li>
+                {% else %}
+                    <!-- Streamlined Teacher Navigation Links -->
+                    <li><a href="{{ url_for('score_sheet') }}" class="active">📝 Score Sheet</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <span>{{ session.get('username') or session.get('teacher_name') }} | <a href="{{ url_for('logout') if not session.get('teacher_id') else url_for('teacher_logout') }}" style="color: #cbd5e1; text-decoration: underline;">Logout</a></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h2>Score Sheet & Assessment Entry</h2>
+            <div class="session-badge">
+                📅 {{ user.academic_session }} — {{ user.current_term }}
+            </div>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto;">
+            <div class="container">
+                <a href="{{ url_for('student_list') }}" style="color: #1e3a8a; text-decoration: none; font-weight: bold; font-size: 13px;">← Back to Student List</a>
+                <h2 style="color: #1e3a8a; margin-top: 10px; font-size: 20px;">{{ student['name'] }} <span style="font-size: 14px; color: #64748b;">(Class: {{ student['class'] }})</span></h2>
+
+                <form action="{{ url_for('marks_entry', student_id=student['id']) }}" method="POST">
+
+                    {% if not session.get('teacher_id') %}
+                    <div class="section-card">
+                        <h3>Attendance & General Comments</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Attendance Present:</label>
+                                <input type="number" name="attendance_present" value="{{ student['attendance_present'] or 98 }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Attendance Absent:</label>
+                                <input type="number" name="attendance_absent" value="{{ student['attendance_absent'] or 4 }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Total School Days:</label>
+                                <input type="number" name="total_school_days" value="{{ student['total_school_days'] or 102 }}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Class Teacher's Comment:</label>
+                                <textarea name="class_teacher_comment">{{ student['class_teacher_comment'] or 'Has performed well and should strive for higher achievement.' }}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Head Teacher's Comment:</label>
+                                <textarea name="head_teacher_comment">{{ student['head_teacher_comment'] or 'Made satisfactory progress. Greater commitment will lead to higher achievement.' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="section-card">
+                        <h3>Subject Marks (Test / 40, Exam / 60, Last Term / 100)</h3>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 10px;">Note: Only subjects with entered scores will appear on the report card.</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Test (Max 40)</th>
+                                    <th>Exam (Max 60)</th>
+                                    <th>Last Term Cumm (Optional)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subj in subjects %}
+                                {% set key_slug = subj.lower().replace(' ', '_').replace('-', '_').replace('(', '').replace(')', '').replace('/', '_') %}
+                                {% set existing = marks_dict.get(subj, {}) %}
+                                <tr>
+                                    <td class="subject-title"><strong>{{ subj }}</strong></td>
+                                    <td><input type="number" step="0.5" name="test_{{ key_slug }}" value="{{ existing.get('test_score', '') }}" placeholder="0-40"></td>
+                                    <td><input type="number" step="0.5" name="exam_{{ key_slug }}" value="{{ existing.get('exam_score', '') }}" placeholder="0-60"></td>
+                                    <td><input type="number" step="0.5" name="last_{{ key_slug }}" value="{{ existing.get('last_cumm', '') }}" placeholder="0-100"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not session.get('teacher_id') %}
+                    <div class="section-card">
+                        <h3>Psychomotor Skills & Award Won (Scale 1 - 3)</h3>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Scale Legend: 1 = Very Good | 2 = Good | 3 = Below Average</p>
+                        
+                        {% set psychomotors = ['Creative', 'Verbal Fluency', 'Games', 'Sports', 'Handling tools', 'Drawing & Painting', 'Music Skills'] %}
+                        {% for p in psychomotors %}
+                        {% set p_key = p.lower().replace(' ', '_').replace('&', 'and') %}
+                        <div class="form-row" style="align-items: center; margin-bottom: 6px;">
+                            <div class="form-group" style="flex: 2; margin-bottom: 0;"><label style="font-weight: normal;">{{ p }}:</label></div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select name="{{ p_key }}">
+                                    <option value="1" {% if behavior_dict.get(p, 1) == 1 %}selected{% endif %}>1 - Very Good</option>
+                                    <option value="2" {% if behavior_dict.get(p, 1) == 2 %}selected{% endif %}>2 - Good</option>
+                                    <option value="3" {% if behavior_dict.get(p, 1) == 3 %}selected{% endif %}>3 - Below Average</option>
+                                </select>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="form-row" style="margin-top: 15px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Award / Prize Won:</label>
+                                <input type="text" name="award_won" value="{{ student['award_won'] or '' }}" placeholder="e.g. Best Student in Mathematics">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Effective Areas (Scale 1 - 3)</h3>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Scale Legend: 1 = Very Good | 2 = Good | 3 = Below Average</p>
+                        
+                        {% set effectives = ['Punctuality', 'Neatness', 'Politeness', 'Honesty', 'Relationship with others', 'Leadership', 'Emotional Stability', 'Attitude to school', 'Attentiveness', 'Perseverance'] %}
+                        {% for e in effectives %}
+                        {% set e_key = e.lower().replace(' ', '_') %}
+                        <div class="form-row" style="align-items: center; margin-bottom: 6px;">
+                            <div class="form-group" style="flex: 2; margin-bottom: 0;"><label style="font-weight: normal;">{{ e }}:</label></div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select name="{{ e_key }}">
+                                    <option value="1" {% if behavior_dict.get(e, 1) == 1 %}selected{% endif %}>1 - Very Good</option>
+                                    <option value="2" {% if behavior_dict.get(e, 1) == 2 %}selected{% endif %}>2 - Good</option>
+                                    <option value="3" {% if behavior_dict.get(e, 1) == 3 %}selected{% endif %}>3 - Below Average</option>
+                                </select>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Next Term Bills</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Debt:</label><input type="number" step="0.01" name="bill_debt" value="{{ student['bill_debt'] or 0 }}"></div>
+                            <div class="form-group"><label>School Fees:</label><input type="number" step="0.01" name="bill_school_fees" value="{{ student['bill_school_fees'] or 0 }}"></div>
+                            <div class="form-group"><label>Computer:</label><input type="number" step="0.01" name="bill_computer" value="{{ student['bill_computer'] or 0 }}"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Lessons:</label><input type="number" step="0.01" name="bill_lessons" value="{{ student['bill_lessons'] or 0 }}"></div>
+                            <div class="form-group"><label>Utility:</label><input type="number" step="0.01" name="bill_utility" value="{{ student['bill_utility'] or 0 }}"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Two Buttons at the bottom: Save and Logout -->
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="submit" class="btn-submit" style="flex: 2;">💾 Save Scores</button>
+                        <a href="{{ url_for('teacher_logout') if session.get('teacher_id') else url_for('logout') }}" class="btn-logout" style="flex: 1; line-height: 22px;">🚪 Logout</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

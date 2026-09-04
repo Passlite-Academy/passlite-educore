@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Help & Support - Passlite EduCore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f1f5f9; font-family: Arial, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background: #123c69; color: white; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .sidebar-brand { padding: 20px; font-size: 18px; font-weight: bold; background: #0b2948; text-align: center; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .sidebar-menu li a { display: block; padding: 15px 20px; color: #cbd5e1; text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: #1e4976; color: white; padding-left: 25px; }
+        .sidebar-footer { padding: 15px 20px; background: #0b2948; font-size: 12px; text-align: center; color: #94a3b8; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .support-container { max-width: 750px; margin: 30px auto; background: #fff; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #123c69; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">Passlite Insights</div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                <li><a href="{{ url_for('student_list') }}">👤 Students</a></li>
+                <li><a href="{{ url_for('school_record') }}">🏫 School Record</a></li>
+                <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
+                <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
+                <li><a href="{{ url_for('school_settings') }}">⚙️ Settings</a></li>
+                <li><a href="{{ url_for('support') }}" class="active">💬 Help & Support</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <span>{{ session.get('username') }} | <a href="{{ url_for('logout') }}" style="color: #cbd5e1; text-decoration: underline;">Logout</a></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h2>Help & Support Desk</h2>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto;">
+            <div class="support-container">
+                <h3 style="color: #123c69; margin-bottom: 15px; font-size: 22px;">Need Immediate Assistance?</h3>
+                <p class="text-muted" style="font-size: 13px;">School management can reach out to Passlite technical support instantly via WhatsApp for rapid response, or send a formal inquiry below.</p>
+
+                <!-- WhatsApp Quick Action Box -->
+                <div class="p-3 mb-4 rounded text-white d-flex justify-content-between align-items-center" style="background-color: #25d366;">
+                    <div>
+                        <h5 class="m-0 fw-bold"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</h5>
+                        <small>Fastest response time for urgent portal setup & approvals.</small>
+                    </div>
+                    <!-- Replace with your actual WhatsApp phone link -->
+                    <a href="https://wa.me/2348135536873?text=Hello%20Passlite%20Support,%20I%20am%20from%20{{ user.school_name }}%20and%20need%20help%20with:" target="_blank" class="btn btn-light fw-bold text-success btn-sm">Open WhatsApp</a>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="mb-3 text-secondary" style="font-size: 16px;">Send a Support Message (Email)</h5>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">School Name & User</label>
+                        <input type="text" class="form-control" value="{{ user.school_name }} ({{ user.username }})" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subject / Issue Type</label>
+                        <select class="form-select" name="subject" required>
+                            <option value="General Inquiry">General Inquiry</option>
+                            <option value="Payment / Subscription Issue">Payment / Subscription Issue</option>
+                            <option value="Signature or Report Card Help">Signature or Report Card Help</option>
+                            <option value="Technical Bug / Error">Technical Bug / Error</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Message Details</label>
+                        <textarea class="form-control" name="message" rows="4" placeholder="Describe your issue or feature request clearly..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background-color: #123c69; border-color: #123c69;">Send Message to Support</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

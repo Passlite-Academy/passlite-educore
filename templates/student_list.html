@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Directory - Passlite Insights Academy</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f5f9; margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        .sidebar { width: 260px; background: #123c69; color: white; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .sidebar-brand { padding: 20px; font-size: 18px; font-weight: bold; background: #0b2948; text-align: center; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .sidebar-menu li a { display: block; padding: 14px 20px; color: #cbd5e1; text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: #1e4976; color: white; padding-left: 25px; }
+        .sidebar-footer { padding: 15px 20px; background: #0b2948; font-size: 12px; text-align: center; color: #94a3b8; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .topbar h2 { margin: 0; color: #123c69; font-size: 18px; }
+        .container { max-width: 1100px; margin: 30px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; }
+        h3.class-header { color: #123c69; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 25px; font-size: 16px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; font-size: 14px; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; color: #475569; font-weight: bold; }
+        tr:hover { background: #f8fafc; }
+        .action-btn { background: #123c69; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; margin-right: 5px; display: inline-block; }
+        .action-btn:hover { background: #0b2948; }
+        .alert-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">Passlite Insights</div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                
+                {% if not session.get('teacher_id') %}
+                    <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                    <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
+                    <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
+                    <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
+                    <li><a href="{{ url_for('school_settings') }}">🏫 School Record</a></li>
+                    <li><a href="{{ url_for('manage_teachers') }}">👥 Users</a></li>
+                    <li><a href="{{ url_for('school_settings') }}">⚙️ Settings</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('score_sheet') }}" class="active">📝 Score Sheet</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <span>{{ session.get('username') or session.get('teacher_name') }} | <a href="{{ url_for('logout') if not session.get('teacher_id') else url_for('teacher_logout') }}" style="color: #cbd5e1; text-decoration: underline;">Logout</a></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h2>School Student Directory & Report Review</h2>
+            <div>📅 {{ user.academic_session }} | {{ user.current_term }}</div>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto;">
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert-box">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% set classes = ['JSS 1', 'JSS 2', 'JSS 3', 'SS 1', 'SS 2', 'SS 3'] %}
+                
+                {% for target_class in classes %}
+                    <h3 class="class-header">Class Group: {{ target_class }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Full Name</th>
+                                <th>Class</th>
+                                <th>Student No (Roll)</th>
+                                <th>Gender</th>
+                                <th>Department</th>
+                                <th>Date of Birth</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set found = namespace(val=false) %}
+                            {% for student in students %}
+                                {% if student.class == target_class %}
+                                    {% set found.val = true %}
+                                    <tr>
+                                        <td><strong>{{ student.name }}</strong></td>
+                                        <td>{{ student.class }}</td>
+                                        <td>{{ student.roll_number }}</td>
+                                        <td>{{ student.sex }}</td>
+                                        <td>{{ student.department or 'N/A' }}</td>
+                                        <td>{{ student.dob or 'N/A' }}</td>
+                                        <td>
+                                            {% if view_mode == 'reports' %}
+                                                <a href="{{ url_for('report_card', student_id=student.id) }}" class="action-btn" style="background:#059669;">📄 View & Print Report</a>
+                                            {% else %}
+                                                <a href="{{ url_for('marks_entry', student_id=student.id) }}" class="action-btn">Enter Scores</a>
+                                                {% if not session.get('teacher_id') %}
+                                                    <a href="{{ url_for('report_card', student_id=student.id) }}" class="action-btn" style="background:#059669;">View Report</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            {% if not found.val %}
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 15px;">No students registered under {{ target_class }} yet.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
