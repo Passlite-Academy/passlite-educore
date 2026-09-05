@@ -49,10 +49,21 @@
         .row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid #eee;
             font-size: 14px;
             color: #334155;
+        }
+
+        .row select {
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #fff;
+            width: 60%;
+            cursor: pointer;
         }
 
         .amount {
@@ -133,11 +144,6 @@
         </div>
 
         <div class="row">
-            <strong>School Category</strong>
-            <span>{{ user.school_type }} School</span>
-        </div>
-
-        <div class="row">
             <strong>Academic Session</strong>
             <span>{{ user.academic_session }}</span>
         </div>
@@ -147,18 +153,23 @@
             <span>{{ user.current_term }}</span>
         </div>
 
-        <div class="row">
-            <strong>Access Coverage</strong>
-            <span>Continuous Assessments, Scores & PDF Reports</span>
-        </div>
-
-        <div class="amount">
-            ₦{{ "{:,.0f}".format(amount) }}
-        </div>
-
         <form action="{{ url_for('pay') }}" method="POST">
+            <div class="row" style="border-bottom: none; margin-top: 10px;">
+                <strong>Select Coverage & Duration</strong>
+                <select name="coverage_type" id="coverage_type" onchange="updateAmount()" required>
+                    <option value="multi_junior" data-price="20000">Junior School Only - 1 Term (₦20,000)</option>
+                    <option value="multi_senior" data-price="25000">Senior School Only - 1 Term (₦25,000)</option>
+                    <option value="multi_both" data-price="40000">Junior & Senior Combo - 1 Term (₦40,000)</option>
+                    <option value="multi_session" data-price="100000">Full Session - All 3 Terms Combo (₦100,000)</option>
+                </select>
+            </div>
+
+            <div class="amount" id="display-amount">
+                ₦20,000
+            </div>
+
             <button type="submit" class="button">
-                Proceed with Paystack Payment
+                Proceed with Paystack Payment 🚀
             </button>
         </form>
 
@@ -169,6 +180,17 @@
     </div>
 
 </div>
+
+<script>
+    function updateAmount() {
+        const selectElement = document.getElementById('coverage_type');
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        
+        const formattedPrice = Number(price).toLocaleString('en-US');
+        document.getElementById('display-amount').innerText = '₦' + formattedPrice;
+    }
+</script>
 
 </body>
 

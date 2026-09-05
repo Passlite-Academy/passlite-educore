@@ -229,8 +229,8 @@ def select_term():
         
     conn = get_db_connection()
     if request.method == 'POST':
-        selected_session = request.form.get('academic_session')
-        selected_term = request.form.get('current_term')
+        selected_session = request.form.get('academic_session', '2026/2027')
+        selected_term = request.form.get('current_term', 'First Term')
         
         conn.execute('UPDATE users SET academic_session = ?, current_term = ? WHERE id = ?', 
                      (selected_session, selected_term, session['user_id']))
@@ -259,8 +259,8 @@ def payment_portal():
     
     user = dict(user_row) if user_row else {}
     
-    # Default initial amount for the view template
-    amount = 25000
+    # Default initial amount view fallback
+    amount = 20000
     
     return render_template('payment_portal.html', user=user, amount=amount)
 
@@ -275,18 +275,19 @@ def pay():
     
     user = dict(user_row) if user_row else {}
     
-    # Capture coverage choice dynamically from the form selection
-    coverage_type = request.form.get('coverage_type', 'Junior')
+    # Capture coverage type dynamically from the form selection
+    coverage_type = request.form.get('coverage_type', 'multi_junior')
     academic_session = user.get('academic_session', '2026/2027')
     
-    # Tiered pricing calculation
-    if coverage_type == 'Senior':
-        amount_naira = 30000
-    elif coverage_type == 'Both':
-        amount_naira = 50000
-    else:
-        amount_naira = 25000
-        
+    # Updated Multi-User Pricing Matrix
+    pricing_tiers = {
+        'multi_junior': 20000,
+        'multi_senior': 25000,
+        'multi_both': 40000,
+        'multi_session': 100000
+    }
+    
+    amount_naira = pricing_tiers.get(coverage_type, 20000)
     amount_kobo = amount_naira * 100
     email = user.get('email') or 'admin@passliteeducore.com'
     
@@ -343,14 +344,30 @@ def verify_payment():
             user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
             
             sess = metadata.get('academic_session') or user['academic_session']
-            trm = metadata.get('current_term') or user['current_term']
+            current_trm = metadata.get('current_term') or user['current_term']
+            coverage_type = metadata.get('coverage_type')
             amount_paid = data['amount'] / 100
             
-            # Record active term subscription so they never get asked to pay again for this term
-            conn.execute('''
-                INSERT INTO school_subscriptions (user_id, academic_session, term, status, reference, amount)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (user_id, sess, trm, 'active', reference, amount_paid))
+            # If Full Session selected, automatically unlock all 3 terms for this session
+            if coverage_type == 'multi_session':
+                all_terms = ['First Term', 'Second Term', 'Third Term']
+                for t in all_terms:
+                    existing_sub = conn.execute('SELECT id FROM school_subscriptions WHERE user_id = ? AND academic_session = ? AND term = ?', 
+                                                (user_id, sess, t)).fetchone()
+                    if not existing_sub:
+                        conn.execute('''
+                            INSERT INTO school_subscriptions (user_id, academic_session, term, status, reference, amount)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (user_id, sess, t, 'active', reference, amount_paid / 3))
+            else:
+                existing_sub = conn.execute('SELECT id FROM school_subscriptions WHERE user_id = ? AND academic_session = ? AND term = ?', 
+                                            (user_id, sess, current_trm)).fetchone()
+                if not existing_sub:
+                    conn.execute('''
+                        INSERT INTO school_subscriptions (user_id, academic_session, term, status, reference, amount)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (user_id, sess, current_trm, 'active', reference, amount_paid))
+                    
             conn.commit()
             conn.close()
             
@@ -629,8 +646,8 @@ def school_settings():
         email = request.form.get('email', '')
         vacation_date = request.form.get('vacation_date', '')
         resumption_date = request.form.get('resumption_date', '')
-        academic_session = request.form.get('academic_session', '')
-        current_term = request.form.get('current_term', '')
+        academic_session = request.form.get('academic_session', '2026/2027')
+        current_term = request.form.get('current_term', 'First Term')
         school_type = request.form.get('school_type', 'Junior')
         
         existing_user = conn.execute('SELECT logo, head_teacher_signature, teacher_signature FROM users WHERE id = ?', (session['user_id'],)).fetchone()

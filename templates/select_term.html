@@ -21,6 +21,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 400px;
             border-top: 5px solid #1e3a8a;
+            box-sizing: border-box;
         }
         h2 {
             color: #1e3a8a;
@@ -97,7 +98,7 @@
             <label>Academic Session:</label>
             <select name="academic_session" required>
                 {% for sess in academic_sessions %}
-                    <option value="{{ sess }}" {% if user and user.academic_session == sess %}selected{% endif %}>
+                    <option value="{{ sess }}" {% if user and user.academic_session == sess %}selected{% elif not user and sess == '2026/2027' %}selected{% endif %}>
                         {{ sess }} Academic Session
                     </option>
                 {% endfor %}

@@ -40,7 +40,7 @@
             <div class="sidebar-brand">Passlite Insights</div>
             <ul class="sidebar-menu">
                 <li><a href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
-                <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                <li><a href="{{ url_for('add_student') }}">➕ Register Students</a></li>
                 <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
                 <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
                 <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
@@ -88,7 +88,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Assign Subjects (Check all that this teacher handles):</label>
+                        <label>Assign Subjects (Check all that this teacher handles across Junior & Senior):</label>
                         <div class="subjects-box">
                             <div class="section-subheading">Junior Secondary Subjects</div>
                             <label><input type="checkbox" name="subjects" value="English language"> English language (JSS)</label>

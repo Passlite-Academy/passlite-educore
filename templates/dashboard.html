@@ -17,7 +17,7 @@
         .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .topbar h2 { margin: 0; color: #123c69; font-size: 18px; }
         
-        /* Professional Pastel Dashboard Cards matching your design */
+        /* Professional Pastel Dashboard Cards */
         .stat-card {
             border-radius: 12px;
             padding: 22px 24px;
@@ -52,7 +52,7 @@
             <div class="sidebar-brand">Passlite Insights</div>
             <ul class="sidebar-menu">
                 <li><a href="{{ url_for('dashboard') }}" class="active">📊 Dashboard</a></li>
-                <li><a href="{{ url_for('student_entry') }}">➕ Register Students</a></li>
+                <li><a href="{{ url_for('add_student') }}">➕ Register Students</a></li>
                 <li><a href="{{ url_for('student_list') }}">👥 Student List</a></li>
                 <li><a href="{{ url_for('score_sheet') }}">📝 Score Sheet</a></li>
                 <li><a href="{{ url_for('report_card_overview') }}">📄 Report Card</a></li>
@@ -108,7 +108,7 @@
                     <h5 style="color: #123c69; font-weight: bold; margin-bottom: 15px;">Quick Actions & Overview</h5>
                     <p class="text-muted small">Use the left sidebar navigation to register new students, assign teacher subjects, enter terminal examination marks, or review generated report cards.</p>
                     <div class="d-flex gap-2 mt-3">
-                        <a href="{{ url_for('student_entry') }}" class="btn btn-primary" style="background-color: #123c69; border-color: #123c69;">+ Register New Student</a>
+                        <a href="{{ url_for('add_student') }}" class="btn btn-primary" style="background-color: #123c69; border-color: #123c69;">+ Register New Student</a>
                         <a href="{{ url_for('score_sheet') }}" class="btn btn-outline-primary">Enter Assessment Scores</a>
                     </div>
                 </div>

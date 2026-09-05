@@ -113,7 +113,7 @@
                 <label for="academic_session">Academic Session</label>
                 <select id="academic_session" name="academic_session" required>
                     {% for sess in academic_sessions %}
-                        <option value="{{ sess }}" {% if loop.first %}selected{% endif %}>{{ sess }}</option>
+                        <option value="{{ sess }}" {% if sess == '2026/2027' %}selected{% endif %}>{{ sess }}</option>
                     {% endfor %}
                 </select>
             </div>
